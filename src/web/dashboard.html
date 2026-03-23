@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>openmaven</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;700;800&display=swap');
+
+  :root {
+    --bg: #0b0b0f;
+    --surface: #13131a;
+    --border: #1e1e2a;
+    --accent: #ff4545;
+    --accent2: #ff8c42;
+    --green: #3ddc84;
+    --yellow: #ffd166;
+    --dim: #4a4a60;
+    --text: #d0d0e0;
+    --bright: #f0f0f8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+  }
+  .logo span:first-child { color: var(--accent); }
+  .logo span:last-child { color: var(--bright); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 11px;
+    color: var(--dim);
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  main {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 28px;
+    display: grid;
+    gap: 20px;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.yellow::before { background: var(--yellow); }
+  .stat-card.orange::before { background: var(--accent2); }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--bright);
+  }
+
+  .stat-sub {
+    font-size: 10px;
+    color: var(--dim);
+    margin-top: 4px;
+  }
+
+  /* Two column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* Panel */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--dim);
+  }
+
+  .panel-count {
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  /* Feed */
+  .feed {
+    max-height: 520px;
+    overflow-y: auto;
+  }
+
+  .feed::-webkit-scrollbar { width: 4px; }
+  .feed::-webkit-scrollbar-track { background: transparent; }
+  .feed::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .feed-item {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .feed-item:last-child { border-bottom: none; }
+
+  .feed-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .sub-tag {
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .author-tag {
+    font-size: 10px;
+    color: var(--dim);
+  }
+
+  .time-tag {
+    font-size: 10px;
+    color: var(--dim);
+    margin-left: auto;
+  }
+
+  .feed-body {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.5;
+    margin-bottom: 8px;
+    max-height: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  .feed-sentiment {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sentiment-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .sentiment-badge.positive { background: rgba(61,220,132,0.15); color: var(--green); }
+  .sentiment-badge.negative { background: rgba(255,69,69,0.15); color: var(--accent); }
+  .sentiment-badge.neutral  { background: rgba(74,74,96,0.2); color: var(--dim); }
+
+  .score-bar-wrap {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .score-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  .score-num {
+    font-size: 10px;
+    color: var(--dim);
+    width: 36px;
+    text-align: right;
+  }
+
+  /* Subreddit sidebar */
+  .sub-list {
+    list-style: none;
+  }
+
+  .sub-item {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .sub-item:hover { background: rgba(255,255,255,0.02); }
+  .sub-item:last-child { border-bottom: none; }
+  .sub-item.active { border-left: 2px solid var(--accent); }
+
+  .sub-name {
+    color: var(--bright);
+    margin-bottom: 4px;
+    font-size: 12px;
+  }
+
+  .sub-stats-row {
+    display: flex;
+    gap: 12px;
+  }
+
+  .sub-stat {
+    font-size: 10px;
+    color: var(--dim);
+  }
+
+  .sub-stat span { color: var(--text); }
+
+  .mini-bar {
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+    margin-top: 6px;
+    overflow: hidden;
+    display: flex;
+    gap: 1px;
+  }
+
+  .mini-bar-pos { background: var(--green); height: 100%; border-radius: 1px; }
+  .mini-bar-neg { background: var(--accent); height: 100%; border-radius: 1px; }
+  .mini-bar-neu { background: var(--dim); height: 100%; border-radius: 1px; }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.2);
+  }
+
+  .filter-btn {
+    font-family: inherit;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--dim);
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* Empty state */
+  .empty {
+    padding: 48px 20px;
+    text-align: center;
+    color: var(--dim);
+    font-size: 12px;
+  }
+
+  .empty-icon { font-size: 32px; margin-bottom: 12px; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--accent);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.3s;
+    z-index: 9999;
+  }
+
+  #toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span>RED</span><span>PULSE</span>
+  </div>
+  <div class="header-right">
+    <span><span class="status-dot"></span>live</span>
+    <span id="last-updated">—</span>
+  </div>
+</header>
+
+<main>
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Comments Analyzed</div>
+      <div class="stat-value" id="stat-total">0</div>
+      <div class="stat-sub">all time</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Positive</div>
+      <div class="stat-value" id="stat-pos">0</div>
+      <div class="stat-sub" id="stat-pos-pct">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Negative</div>
+      <div class="stat-value" id="stat-neg">0</div>
+      <div class="stat-sub" id="stat-neg-pct">—</div>
+    </div>
+    <div class="stat-card yellow">
+      <div class="stat-label">Avg Score</div>
+      <div class="stat-value" id="stat-avg">—</div>
+      <div class="stat-sub">-1.0 to 1.0</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Live Feed</span>
+        <span class="panel-count" id="feed-count">0 results</span>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+        <button class="filter-btn" onclick="setFilter('positive', this)">Positive</button>
+        <button class="filter-btn" onclick="setFilter('negative', this)">Negative</button>
+        <button class="filter-btn" onclick="setFilter('neutral', this)">Neutral</button>
+      </div>
+      <div class="feed" id="feed">
+        <div class="empty">
+          <div class="empty-icon">◌</div>
+          Waiting for data...
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Subreddits</span>
+      </div>
+      <ul class="sub-list" id="sub-list">
+        <li class="sub-item">
+          <div class="sub-name" style="color:var(--dim)">Loading...</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+let allResults = [];
+let activeFilter = 'all';
+let activeSub = null;
+
+async function fetchData() {
+  try {
+    const [recentRes, statsRes] = await Promise.all([
+      fetch('/api/recent?limit=200'),
+      fetch('/api/stats')
+    ]);
+    const recent = await recentRes.json();
+    const stats = await statsRes.json();
+    return { recent, stats };
+  } catch(e) {
+    return null;
+  }
+}
+
+function scoreColor(score) {
+  if (score > 0.2) return 'var(--green)';
+  if (score < -0.2) return 'var(--accent)';
+  return 'var(--dim)';
+}
+
+function renderFeed(results) {
+  const feed = document.getElementById('feed');
+  const count = document.getElementById('feed-count');
+
+  let filtered = results;
+  if (activeFilter !== 'all') {
+    filtered = results.filter(r => r.label === activeFilter);
+  }
+  if (activeSub) {
+    filtered = filtered.filter(r => r.subreddit === activeSub);
+  }
+
+  count.textContent = `${filtered.length} results`;
+
+  if (filtered.length === 0) {
+    feed.innerHTML = `<div class="empty"><div class="empty-icon">◌</div>No results yet</div>`;
+    return;
+  }
+
+  feed.innerHTML = filtered.slice(0, 100).map(r => {
+    const barWidth = ((r.score + 1) / 2 * 100).toFixed(1);
+    const timeAgo = formatTime(r.created_at);
+    const bodyEsc = r.body.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `
+      <div class="feed-item">
+        <div class="feed-meta">
+          <span class="sub-tag">r/${r.subreddit}</span>
+          <span class="author-tag">u/${r.author}</span>
+          <span class="time-tag">${timeAgo}</span>
+        </div>
+        <div class="feed-body">${bodyEsc}</div>
+        <div class="feed-sentiment">
+          <span class="sentiment-badge ${r.label}">${r.label}</span>
+          <div class="score-bar-wrap">
+            <div class="score-bar" style="width:${barWidth}%;background:${scoreColor(r.score)}"></div>
+          </div>
+          <span class="score-num">${r.score.toFixed(2)}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderStats(recent, stats) {
+  const total = recent.length;
+  const pos = recent.filter(r => r.label === 'positive').length;
+  const neg = recent.filter(r => r.label === 'negative').length;
+  const avgScore = total > 0
+    ? (recent.reduce((s, r) => s + r.score, 0) / total).toFixed(2)
+    : '—';
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-pos').textContent = pos;
+  document.getElementById('stat-neg').textContent = neg;
+  document.getElementById('stat-avg').textContent = avgScore;
+  document.getElementById('stat-pos-pct').textContent = total > 0 ? `${(pos/total*100).toFixed(1)}%` : '—';
+  document.getElementById('stat-neg-pct').textContent = total > 0 ? `${(neg/total*100).toFixed(1)}%` : '—';
+
+  const subList = document.getElementById('sub-list');
+  if (!stats || stats.length === 0) return;
+
+  subList.innerHTML = stats.map(s => {
+    const total = s.positive_count + s.negative_count + s.neutral_count;
+    const posPct = total > 0 ? (s.positive_count / total * 100).toFixed(0) : 0;
+    const negPct = total > 0 ? (s.negative_count / total * 100).toFixed(0) : 0;
+    const neuPct = total > 0 ? (s.neutral_count / total * 100).toFixed(0) : 0;
+    const isActive = activeSub === s.subreddit;
+    return `
+      <li class="sub-item ${isActive ? 'active' : ''}" onclick="filterBySub('${s.subreddit}')">
+        <div class="sub-name">r/${s.subreddit}</div>
+        <div class="sub-stats-row">
+          <span class="sub-stat">total <span>${s.total}</span></span>
+          <span class="sub-stat">avg <span style="color:${scoreColor(s.avg_score)}">${(s.avg_score).toFixed(2)}</span></span>
+        </div>
+        <div class="mini-bar">
+          <div class="mini-bar-pos" style="width:${posPct}%"></div>
+          <div class="mini-bar-neg" style="width:${negPct}%"></div>
+          <div class="mini-bar-neu" style="width:${neuPct}%"></div>
+        </div>
+      </li>
+    `;
+  }).join('');
+}
+
+function formatTime(isoStr) {
+  if (!isoStr) return '—';
+  const d = new Date(isoStr);
+  const diff = Math.floor((Date.now() - d) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  return `${Math.floor(diff/3600)}h ago`;
+}
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFeed(allResults);
+}
+
+function filterBySub(sub) {
+  activeSub = activeSub === sub ? null : sub;
+  renderFeed(allResults);
+  renderStats(allResults, null);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function refresh() {
+  const data = await fetchData();
+  if (!data) return;
+
+  const prevLen = allResults.length;
+  allResults = data.recent;
+
+  if (allResults.length > prevLen && prevLen > 0) {
+    showToast(`+${allResults.length - prevLen} new`);
+  }
+
+  renderFeed(allResults);
+  renderStats(allResults, data.stats);
+  document.getElementById('last-updated').textContent = 'updated ' + formatTime(new Date().toISOString());
+}
+
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>
