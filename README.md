@@ -29,6 +29,8 @@ It goes beyond basic sentiment scraping—OpenMaven generates analyst-style summ
 * 🔮 **Predictive Signals** — Produces forward-looking predictions with confidence scores, so you know how much weight to put on them.
 * 📚 **Contextual Memory** — Uses a vector store to retain historical data, allowing it to connect current events to past patterns.
 * ⚡ **High Performance** — Rust keeps things fast and memory-safe, handling large data volumes without issue.
+* 🔔 **Telegram/Discord Notifications** - Uses telegram bot token or discord webhook to send formatted notificaitons
+* ⏲️ **Low latency** - Due to sylvia, we get access to data at sub 7 second latency from the moment it is posted, but granted with higher polling rates prices increase as well, and its often not needed for normal usecase unless youre monitoring a lot of subreddits.    
 
 ## Tech Stack
 
