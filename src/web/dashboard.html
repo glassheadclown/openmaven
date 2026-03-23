@@ -4,247 +4,415 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>openmaven</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;700;800&display=swap');
-
   :root {
-    --bg: #0b0b0f;
-    --surface: #13131a;
-    --border: #1e1e2a;
-    --accent: #ff4545;
-    --accent2: #ff8c42;
-    --green: #3ddc84;
-    --yellow: #ffd166;
-    --dim: #4a4a60;
-    --text: #d0d0e0;
-    --bright: #f0f0f8;
+    --bg:        #08080c;
+    --surface:   #0f0f16;
+    --surface2:  #151520;
+    --border:    rgba(255,255,255,0.06);
+    --border2:   rgba(255,255,255,0.10);
+    --accent:    #6c63ff;
+    --accent2:   #a78bfa;
+    --rose:      #f43f6e;
+    --emerald:   #34d399;
+    --amber:     #fbbf24;
+    --sky:       #38bdf8;
+    --muted:     rgba(255,255,255,0.28);
+    --text:      rgba(255,255,255,0.72);
+    --bright:    rgba(255,255,255,0.92);
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
 
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Manrope', sans-serif;
     font-size: 13px;
     line-height: 1.6;
     min-height: 100vh;
+    overflow-x: hidden;
   }
 
-  /* Scanline overlay */
+  /* Background gradient orbs */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.03) 2px,
-      rgba(0,0,0,0.03) 4px
-    );
+    background:
+      radial-gradient(ellipse 600px 400px at 10% 0%, rgba(108,99,255,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 500px 300px at 90% 80%, rgba(244,63,110,0.05) 0%, transparent 70%),
+      radial-gradient(ellipse 800px 600px at 50% 50%, rgba(52,211,153,0.025) 0%, transparent 70%);
     pointer-events: none;
-    z-index: 1000;
+    z-index: 0;
   }
 
-  header {
+  /* Fine grid */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 200;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 18px 28px;
+    padding: 0 32px;
+    height: 58px;
+    background: rgba(8,8,12,0.75);
+    backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    position: sticky;
-    top: 0;
-    z-index: 100;
   }
 
-  .logo {
-    font-family: 'Syne', sans-serif;
+  .wordmark {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    font-family: 'Manrope', sans-serif;
     font-weight: 800;
-    font-size: 20px;
+    font-size: 18px;
     letter-spacing: -0.5px;
+    color: var(--bright);
+    text-decoration: none;
   }
-  .logo span:first-child { color: var(--accent); }
-  .logo span:last-child { color: var(--bright); }
 
-  .header-right {
+  .wordmark em {
+    font-style: italic;
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: var(--accent2);
+    line-height: 1;
+    position: relative;
+    top: 1px;
+  }
+
+  .nav-right {
     display: flex;
     align-items: center;
-    gap: 20px;
-    font-size: 11px;
-    color: var(--dim);
+    gap: 24px;
   }
 
-  .status-dot {
-    display: inline-block;
+  .live-chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px;
+    background: rgba(52,211,153,0.08);
+    border: 1px solid rgba(52,211,153,0.2);
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--emerald);
+    letter-spacing: 0.3px;
+  }
+
+  .live-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--green);
-    margin-right: 6px;
-    animation: pulse 2s infinite;
+    background: var(--emerald);
+    box-shadow: 0 0 6px var(--emerald);
+    animation: livepulse 2s ease-in-out infinite;
   }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+  @keyframes livepulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
   }
 
+  .nav-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.3px;
+  }
+
+  /* ─── MAIN ─── */
   main {
-    max-width: 1300px;
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 28px;
+    padding: 36px 32px 48px;
     display: grid;
-    gap: 20px;
+    gap: 28px;
   }
 
-  /* Stats row */
+  /* ─── PAGE HEADER ─── */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: -6px;
+  }
+
+  .page-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 42px;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--bright);
+    letter-spacing: -1px;
+  }
+
+  .page-title span {
+    color: var(--accent2);
+    font-style: italic;
+  }
+
+  .page-desc {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 400;
+    max-width: 320px;
+    text-align: right;
+    line-height: 1.5;
+  }
+
+  /* ─── STATS ROW ─── */
   .stats-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
+    gap: 16px;
   }
 
   .stat-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 18px 20px;
+    border-radius: 12px;
+    padding: 22px 24px;
     position: relative;
     overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
   }
 
-  .stat-card::before {
+  .stat-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-1px);
+  }
+
+  .stat-card::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--accent);
+    inset: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.025) 0%, transparent 60%);
+    pointer-events: none;
   }
 
-  .stat-card.green::before { background: var(--green); }
-  .stat-card.yellow::before { background: var(--yellow); }
-  .stat-card.orange::before { background: var(--accent2); }
+  .stat-glow {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    opacity: 0.15;
+    filter: blur(24px);
+  }
+
+  .stat-card.c-violet .stat-glow { background: var(--accent); }
+  .stat-card.c-emerald .stat-glow { background: var(--emerald); }
+  .stat-card.c-rose .stat-glow { background: var(--rose); }
+  .stat-card.c-amber .stat-glow { background: var(--amber); }
 
   .stat-label {
-    font-size: 10px;
-    color: var(--dim);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 8px;
+    color: var(--muted);
+    margin-bottom: 12px;
   }
 
   .stat-value {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
+    font-family: 'Instrument Serif', serif;
+    font-size: 44px;
+    line-height: 1;
     color: var(--bright);
+    letter-spacing: -1px;
+    margin-bottom: 6px;
   }
 
   .stat-sub {
-    font-size: 10px;
-    color: var(--dim);
-    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
   }
 
-  /* Two column layout */
-  .two-col {
+  .stat-card.c-emerald .stat-sub { color: rgba(52,211,153,0.6); }
+  .stat-card.c-rose .stat-sub { color: rgba(244,63,110,0.6); }
+
+  /* ─── BODY GRID ─── */
+  .body-grid {
     display: grid;
-    grid-template-columns: 1fr 360px;
+    grid-template-columns: 1fr 320px;
     gap: 20px;
     align-items: start;
   }
 
-  /* Panel */
-  .panel {
+  /* ─── CARD ─── */
+  .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: 12px;
     overflow: hidden;
   }
 
-  .panel-header {
-    padding: 14px 20px;
+  .card-head {
+    padding: 18px 24px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: rgba(255,255,255,0.015);
   }
 
-  .panel-title {
-    font-size: 11px;
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--dim);
+    color: var(--muted);
   }
 
-  .panel-count {
+  .card-badge {
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
-    color: var(--accent);
+    color: var(--accent2);
+    background: rgba(108,99,255,0.1);
+    border: 1px solid rgba(108,99,255,0.2);
+    border-radius: 100px;
+    padding: 2px 10px;
   }
 
-  /* Feed */
+  /* ─── FILTER BAR ─── */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .filter-btn {
+    font-family: 'Manrope', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover {
+    border-color: rgba(108,99,255,0.4);
+    color: var(--accent2);
+  }
+
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 16px rgba(108,99,255,0.3);
+  }
+
+  /* ─── FEED ─── */
   .feed {
-    max-height: 520px;
+    max-height: 560px;
     overflow-y: auto;
   }
 
-  .feed::-webkit-scrollbar { width: 4px; }
+  .feed::-webkit-scrollbar { width: 3px; }
   .feed::-webkit-scrollbar-track { background: transparent; }
-  .feed::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .feed::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
 
   .feed-item {
-    padding: 14px 20px;
+    padding: 18px 24px;
     border-bottom: 1px solid var(--border);
-    animation: slideIn 0.3s ease;
+    transition: background 0.15s;
+    animation: fadeUp 0.3s ease both;
   }
 
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-4px); }
+  .feed-item:hover { background: rgba(255,255,255,0.02); }
+  .feed-item:last-child { border-bottom: none; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
-  .feed-item:last-child { border-bottom: none; }
 
   .feed-meta {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 6px;
+    gap: 8px;
+    margin-bottom: 8px;
   }
 
-  .sub-tag {
+  .sub-pill {
     font-size: 10px;
-    color: var(--accent);
     font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--accent2);
+    background: rgba(167,139,250,0.1);
+    border: 1px solid rgba(167,139,250,0.2);
+    border-radius: 100px;
+    padding: 2px 9px;
   }
 
   .author-tag {
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
-    color: var(--dim);
+    color: var(--muted);
+  }
+
+  .dot-sep {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--border2);
+    flex-shrink: 0;
   }
 
   .time-tag {
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
-    color: var(--dim);
+    color: var(--muted);
     margin-left: auto;
   }
 
   .feed-body {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text);
-    line-height: 1.5;
-    margin-bottom: 8px;
-    max-height: 60px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.55;
+    margin-bottom: 12px;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  .feed-sentiment {
+  .feed-foot {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -252,203 +420,257 @@
 
   .sentiment-badge {
     font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 2px;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 100px;
+    flex-shrink: 0;
   }
 
-  .sentiment-badge.positive { background: rgba(61,220,132,0.15); color: var(--green); }
-  .sentiment-badge.negative { background: rgba(255,69,69,0.15); color: var(--accent); }
-  .sentiment-badge.neutral  { background: rgba(74,74,96,0.2); color: var(--dim); }
+  .sentiment-badge.positive {
+    background: rgba(52,211,153,0.1);
+    color: var(--emerald);
+    border: 1px solid rgba(52,211,153,0.2);
+  }
 
-  .score-bar-wrap {
+  .sentiment-badge.negative {
+    background: rgba(244,63,110,0.1);
+    color: var(--rose);
+    border: 1px solid rgba(244,63,110,0.2);
+  }
+
+  .sentiment-badge.neutral {
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .score-track {
     flex: 1;
     height: 3px;
-    background: var(--border);
-    border-radius: 2px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 100px;
     overflow: hidden;
   }
 
-  .score-bar {
+  .score-fill {
     height: 100%;
-    border-radius: 2px;
-    transition: width 0.5s ease;
+    border-radius: 100px;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
   }
 
   .score-num {
-    font-size: 10px;
-    color: var(--dim);
-    width: 36px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    width: 38px;
     text-align: right;
+    flex-shrink: 0;
   }
 
-  /* Subreddit sidebar */
-  .sub-list {
-    list-style: none;
-  }
+  /* ─── SUBREDDIT SIDEBAR ─── */
+  .sub-list { list-style: none; }
 
   .sub-item {
-    padding: 12px 20px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border);
     cursor: pointer;
     transition: background 0.15s;
+    position: relative;
   }
 
   .sub-item:hover { background: rgba(255,255,255,0.02); }
   .sub-item:last-child { border-bottom: none; }
-  .sub-item.active { border-left: 2px solid var(--accent); }
+
+  .sub-item.active {
+    background: rgba(108,99,255,0.06);
+  }
+
+  .sub-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10%;
+    bottom: 10%;
+    width: 2px;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+  }
 
   .sub-name {
+    font-weight: 700;
+    font-size: 13px;
     color: var(--bright);
-    margin-bottom: 4px;
-    font-size: 12px;
+    margin-bottom: 5px;
   }
 
-  .sub-stats-row {
+  .sub-name span {
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .sub-meta {
     display: flex;
+    align-items: center;
     gap: 12px;
+    margin-bottom: 8px;
   }
 
-  .sub-stat {
+  .sub-meta-item {
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
-    color: var(--dim);
+    color: var(--muted);
   }
 
-  .sub-stat span { color: var(--text); }
+  .sub-meta-item b { font-weight: 600; }
 
   .mini-bar {
-    height: 2px;
-    background: var(--border);
-    border-radius: 1px;
-    margin-top: 6px;
+    height: 3px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 100px;
     overflow: hidden;
     display: flex;
     gap: 1px;
   }
 
-  .mini-bar-pos { background: var(--green); height: 100%; border-radius: 1px; }
-  .mini-bar-neg { background: var(--accent); height: 100%; border-radius: 1px; }
-  .mini-bar-neu { background: var(--dim); height: 100%; border-radius: 1px; }
+  .mini-pos { background: var(--emerald); height: 100%; border-radius: 100px; }
+  .mini-neg { background: var(--rose); height: 100%; border-radius: 100px; }
+  .mini-neu { background: rgba(255,255,255,0.15); height: 100%; border-radius: 100px; }
 
-  /* Filter bar */
-  .filter-bar {
-    display: flex;
-    gap: 8px;
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(0,0,0,0.2);
-  }
-
-  .filter-btn {
-    font-family: inherit;
-    font-size: 10px;
-    padding: 4px 10px;
-    border-radius: 2px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--dim);
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    transition: all 0.15s;
-  }
-
-  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-  /* Empty state */
-  .empty {
-    padding: 48px 20px;
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    padding: 64px 24px;
     text-align: center;
-    color: var(--dim);
-    font-size: 12px;
+    color: var(--muted);
   }
 
-  .empty-icon { font-size: 32px; margin-bottom: 12px; }
+  .empty-icon {
+    font-size: 36px;
+    margin-bottom: 14px;
+    opacity: 0.4;
+    animation: spin 8s linear infinite;
+  }
 
-  /* Toast */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .empty-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .empty-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.18);
+  }
+
+  /* ─── TOAST ─── */
   #toast {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--accent);
-    color: white;
-    padding: 10px 16px;
-    border-radius: 4px;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9999;
+    background: var(--surface2);
+    border: 1px solid rgba(108,99,255,0.35);
+    color: var(--accent2);
+    padding: 10px 18px;
+    border-radius: 100px;
     font-size: 12px;
     font-weight: 700;
+    letter-spacing: 0.3px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(108,99,255,0.1);
     opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.3s;
-    z-index: 9999;
+    transform: translateY(12px) scale(0.96);
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
   }
 
-  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <span>RED</span><span>PULSE</span>
+<nav>
+  <a class="wordmark" href="#">
+    open<em>maven</em>
+  </a>
+  <div class="nav-right">
+    <div class="live-chip">
+      <div class="live-dot"></div>
+      Live
+    </div>
+    <span class="nav-time" id="last-updated">—</span>
   </div>
-  <div class="header-right">
-    <span><span class="status-dot"></span>live</span>
-    <span id="last-updated">—</span>
-  </div>
-</header>
+</nav>
 
 <main>
+  <div class="page-header">
+    <h1 class="page-title">Openmaven reports</h1>
+    <p class="page-desc">Real-time Reddit comment analysis powered by NLP</p>
+  </div>
+
   <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-label">Comments Analyzed</div>
+    <div class="stat-card c-violet">
+      <div class="stat-glow"></div>
+      <div class="stat-label">Total Analyzed</div>
       <div class="stat-value" id="stat-total">0</div>
-      <div class="stat-sub">all time</div>
+      <div class="stat-sub">comments</div>
     </div>
-    <div class="stat-card green">
+    <div class="stat-card c-emerald">
+      <div class="stat-glow"></div>
       <div class="stat-label">Positive</div>
       <div class="stat-value" id="stat-pos">0</div>
       <div class="stat-sub" id="stat-pos-pct">—</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card c-rose">
+      <div class="stat-glow"></div>
       <div class="stat-label">Negative</div>
       <div class="stat-value" id="stat-neg">0</div>
       <div class="stat-sub" id="stat-neg-pct">—</div>
     </div>
-    <div class="stat-card yellow">
+    <div class="stat-card c-amber">
+      <div class="stat-glow"></div>
       <div class="stat-label">Avg Score</div>
       <div class="stat-value" id="stat-avg">—</div>
-      <div class="stat-sub">-1.0 to 1.0</div>
+      <div class="stat-sub">range −1.0 → 1.0</div>
     </div>
   </div>
 
-  <div class="two-col">
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title">Live Feed</span>
-        <span class="panel-count" id="feed-count">0 results</span>
+  <div class="body-grid">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Live Feed</span>
+        <span class="card-badge" id="feed-count">0 results</span>
       </div>
       <div class="filter-bar">
-        <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-        <button class="filter-btn" onclick="setFilter('positive', this)">Positive</button>
-        <button class="filter-btn" onclick="setFilter('negative', this)">Negative</button>
-        <button class="filter-btn" onclick="setFilter('neutral', this)">Neutral</button>
+        <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+        <button class="filter-btn" onclick="setFilter('positive',this)">Positive</button>
+        <button class="filter-btn" onclick="setFilter('negative',this)">Negative</button>
+        <button class="filter-btn" onclick="setFilter('neutral',this)">Neutral</button>
       </div>
       <div class="feed" id="feed">
-        <div class="empty">
-          <div class="empty-icon">◌</div>
-          Waiting for data...
+        <div class="empty-state">
+          <div class="empty-icon">◎</div>
+          <div class="empty-label">Awaiting data stream</div>
+          <div class="empty-sub">Comments will appear here once ingestion begins</div>
         </div>
       </div>
     </div>
 
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title">Subreddits</span>
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Subreddits</span>
       </div>
       <ul class="sub-list" id="sub-list">
         <li class="sub-item">
-          <div class="sub-name" style="color:var(--dim)">Loading...</div>
+          <div class="sub-name" style="color:var(--muted);font-weight:400">Loading…</div>
         </li>
       </ul>
     </div>
@@ -469,7 +691,7 @@ async function fetchData() {
       fetch('/api/stats')
     ]);
     const recent = await recentRes.json();
-    const stats = await statsRes.json();
+    const stats  = await statsRes.json();
     return { recent, stats };
   } catch(e) {
     return null;
@@ -477,100 +699,99 @@ async function fetchData() {
 }
 
 function scoreColor(score) {
-  if (score > 0.2) return 'var(--green)';
-  if (score < -0.2) return 'var(--accent)';
-  return 'var(--dim)';
+  if (score >  0.2) return 'var(--emerald)';
+  if (score < -0.2) return 'var(--rose)';
+  return 'rgba(255,255,255,0.2)';
 }
 
 function renderFeed(results) {
-  const feed = document.getElementById('feed');
+  const feed  = document.getElementById('feed');
   const count = document.getElementById('feed-count');
 
   let filtered = results;
-  if (activeFilter !== 'all') {
-    filtered = results.filter(r => r.label === activeFilter);
-  }
-  if (activeSub) {
-    filtered = filtered.filter(r => r.subreddit === activeSub);
-  }
+  if (activeFilter !== 'all') filtered = filtered.filter(r => r.label === activeFilter);
+  if (activeSub)              filtered = filtered.filter(r => r.subreddit === activeSub);
 
   count.textContent = `${filtered.length} results`;
 
-  if (filtered.length === 0) {
-    feed.innerHTML = `<div class="empty"><div class="empty-icon">◌</div>No results yet</div>`;
+  if (!filtered.length) {
+    feed.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">◎</div>
+        <div class="empty-label">No results</div>
+        <div class="empty-sub">Try adjusting your filters</div>
+      </div>`;
     return;
   }
 
   feed.innerHTML = filtered.slice(0, 100).map(r => {
-    const barWidth = ((r.score + 1) / 2 * 100).toFixed(1);
-    const timeAgo = formatTime(r.created_at);
-    const bodyEsc = r.body.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const barW = ((r.score + 1) / 2 * 100).toFixed(1);
+    const ago  = formatTime(r.created_at);
+    const body = r.body.replace(/</g,'&lt;').replace(/>/g,'&gt;');
     return `
       <div class="feed-item">
         <div class="feed-meta">
-          <span class="sub-tag">r/${r.subreddit}</span>
-          <span class="author-tag">u/${r.author}</span>
-          <span class="time-tag">${timeAgo}</span>
+          <span class="sub-pill">r/${r.subreddit}</span>
+          <span class="dot-sep"></span>
+          <span class="author-tag">${r.author}</span>
+          <span class="time-tag">${ago}</span>
         </div>
-        <div class="feed-body">${bodyEsc}</div>
-        <div class="feed-sentiment">
+        <div class="feed-body">${body}</div>
+        <div class="feed-foot">
           <span class="sentiment-badge ${r.label}">${r.label}</span>
-          <div class="score-bar-wrap">
-            <div class="score-bar" style="width:${barWidth}%;background:${scoreColor(r.score)}"></div>
+          <div class="score-track">
+            <div class="score-fill" style="width:${barW}%;background:${scoreColor(r.score)}"></div>
           </div>
           <span class="score-num">${r.score.toFixed(2)}</span>
         </div>
-      </div>
-    `;
+      </div>`;
   }).join('');
 }
 
 function renderStats(recent, stats) {
-  const total = recent.length;
-  const pos = recent.filter(r => r.label === 'positive').length;
-  const neg = recent.filter(r => r.label === 'negative').length;
+  const total    = recent.length;
+  const pos      = recent.filter(r => r.label === 'positive').length;
+  const neg      = recent.filter(r => r.label === 'negative').length;
   const avgScore = total > 0
-    ? (recent.reduce((s, r) => s + r.score, 0) / total).toFixed(2)
+    ? (recent.reduce((s,r) => s + r.score, 0) / total).toFixed(2)
     : '—';
 
   document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-pos').textContent = pos;
-  document.getElementById('stat-neg').textContent = neg;
-  document.getElementById('stat-avg').textContent = avgScore;
-  document.getElementById('stat-pos-pct').textContent = total > 0 ? `${(pos/total*100).toFixed(1)}%` : '—';
-  document.getElementById('stat-neg-pct').textContent = total > 0 ? `${(neg/total*100).toFixed(1)}%` : '—';
+  document.getElementById('stat-pos').textContent   = pos;
+  document.getElementById('stat-neg').textContent   = neg;
+  document.getElementById('stat-avg').textContent   = avgScore;
+  document.getElementById('stat-pos-pct').textContent = total ? `${(pos/total*100).toFixed(1)}% of total` : '—';
+  document.getElementById('stat-neg-pct').textContent = total ? `${(neg/total*100).toFixed(1)}% of total` : '—';
+
+  if (!stats || !stats.length) return;
 
   const subList = document.getElementById('sub-list');
-  if (!stats || stats.length === 0) return;
-
   subList.innerHTML = stats.map(s => {
-    const total = s.positive_count + s.negative_count + s.neutral_count;
-    const posPct = total > 0 ? (s.positive_count / total * 100).toFixed(0) : 0;
-    const negPct = total > 0 ? (s.negative_count / total * 100).toFixed(0) : 0;
-    const neuPct = total > 0 ? (s.neutral_count / total * 100).toFixed(0) : 0;
-    const isActive = activeSub === s.subreddit;
+    const t   = s.positive_count + s.negative_count + s.neutral_count;
+    const pp  = t ? (s.positive_count / t * 100).toFixed(0) : 0;
+    const np  = t ? (s.negative_count / t * 100).toFixed(0) : 0;
+    const nup = t ? (s.neutral_count  / t * 100).toFixed(0) : 0;
+    const col = scoreColor(s.avg_score);
     return `
-      <li class="sub-item ${isActive ? 'active' : ''}" onclick="filterBySub('${s.subreddit}')">
-        <div class="sub-name">r/${s.subreddit}</div>
-        <div class="sub-stats-row">
-          <span class="sub-stat">total <span>${s.total}</span></span>
-          <span class="sub-stat">avg <span style="color:${scoreColor(s.avg_score)}">${(s.avg_score).toFixed(2)}</span></span>
+      <li class="sub-item ${activeSub === s.subreddit ? 'active' : ''}" onclick="filterBySub('${s.subreddit}')">
+        <div class="sub-name">r/<span>${s.subreddit}</span></div>
+        <div class="sub-meta">
+          <span class="sub-meta-item"><b>${s.total}</b> comments</span>
+          <span class="sub-meta-item" style="color:${col}"><b>${s.avg_score.toFixed(2)}</b> avg</span>
         </div>
         <div class="mini-bar">
-          <div class="mini-bar-pos" style="width:${posPct}%"></div>
-          <div class="mini-bar-neg" style="width:${negPct}%"></div>
-          <div class="mini-bar-neu" style="width:${neuPct}%"></div>
+          <div class="mini-pos" style="width:${pp}%"></div>
+          <div class="mini-neg" style="width:${np}%"></div>
+          <div class="mini-neu" style="width:${nup}%"></div>
         </div>
-      </li>
-    `;
+      </li>`;
   }).join('');
 }
 
 function formatTime(isoStr) {
   if (!isoStr) return '—';
-  const d = new Date(isoStr);
-  const diff = Math.floor((Date.now() - d) / 1000);
-  if (diff < 60) return `${diff}s ago`;
+  const diff = Math.floor((Date.now() - new Date(isoStr)) / 1000);
+  if (diff < 60)   return `${diff}s ago`;
   if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
   return `${Math.floor(diff/3600)}h ago`;
 }
@@ -598,14 +819,9 @@ function showToast(msg) {
 async function refresh() {
   const data = await fetchData();
   if (!data) return;
-
-  const prevLen = allResults.length;
-  allResults = data.recent;
-
-  if (allResults.length > prevLen && prevLen > 0) {
-    showToast(`+${allResults.length - prevLen} new`);
-  }
-
+  const prev = allResults.length;
+  allResults  = data.recent;
+  if (allResults.length > prev && prev > 0) showToast(`+${allResults.length - prev} new`);
   renderFeed(allResults);
   renderStats(allResults, data.stats);
   document.getElementById('last-updated').textContent = 'updated ' + formatTime(new Date().toISOString());
@@ -614,5 +830,6 @@ async function refresh() {
 refresh();
 setInterval(refresh, 5000);
 </script>
+
 </body>
 </html>
