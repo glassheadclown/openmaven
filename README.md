@@ -13,7 +13,7 @@
 </div>
 <img width="1216" height="330" alt="image" src="https://github.com/user-attachments/assets/b47c9f4d-13b3-4401-909f-6441d817c5b9" />
 <img width="1893" height="1010" alt="image" src="https://github.com/user-attachments/assets/8d4b7aa7-409e-4102-89d2-1f9f3d3c379d" />
-
+<img width="1854" height="1465" alt="image" src="https://github.com/user-attachments/assets/97ffea1b-ed65-498b-869d-05593e390b1b" />
 
 
 ## What is OpenMaven?
@@ -104,6 +104,13 @@ poll_interval_secs = 60
 | 15 minutes | ~$14 |
 
 *AI inference costs vary by provider. OpenMaven batches requests to stay within rate limits.*
+
+## To Do List
+- Implement global keywords that work across all selected subreddits
+- Implement a chat feature for web/tui dashboard
+- Build a better web dashboard
+- Implement trend reporting in Tui dashboard
+- Implement setting daily budget setup  
 
 ## Contributing
 
