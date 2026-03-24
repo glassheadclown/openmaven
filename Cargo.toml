@@ -2,8 +2,8 @@
 name = "openmaven"
 version = "0.1.0"
 edition = "2021"
-description = "Real-time Reddit sentiment analysis powered by Sylvia"
-authors = ["redpulse"]
+description = "Real-time Reddit sentiment analysis"
+authors = ["glassheadclown"]
 license = "MIT"
 
 [[bin]]
